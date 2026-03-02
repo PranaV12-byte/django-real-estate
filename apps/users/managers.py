@@ -24,7 +24,6 @@ class CustomUserManager(BaseUserManager):
         if email:
             email = self.normalize_email(email)
             self.email_validator(email)
-
         else:
             raise ValueError (_('Base User Account: An email address is required'))
         
@@ -35,8 +34,6 @@ class CustomUserManager(BaseUserManager):
             email=email,
             **extra_fields
         )
-
-
 
         user.set_password(password)
         extra_fields.setdefault("is_staff", False)
