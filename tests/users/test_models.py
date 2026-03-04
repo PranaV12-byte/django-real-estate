@@ -15,7 +15,7 @@ def test_user_short_naem(base_user):
 def test_user_full_name(base_user):
     """Test that the user models get_full_name method works"""
     full_name = f"{base_user.first_name} {base_user.last_name}"
-    assert base_user.get_full_name == full_name
+    assert base_user.get_full_name() == full_name
 
 
 def test_base_user_email_is_normalized(base_user):

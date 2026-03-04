@@ -85,8 +85,8 @@ class PropertyDetailView(APIView):
             property.views += 1
             property.save()
 
-            serializer = PropertySerializer(property, context={"context": request})
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = PropertySerializer(property, context={"context": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(["PUT"])
@@ -115,8 +115,11 @@ def update_property_api_view(request, slug):
 @permission_classes([permissions.IsAuthenticated])
 def create_property_api_view(request):
     user = request.user
-    data = request.data
-    data["user"] = request.user.id
+    
+    # Handle immutable QueryDicts when dealing with formData
+    data = request.data.copy()
+    data["user"] = request.user.pkid
+    
     serializer = PropertyCreateSerializer(data=data)
 
     if serializer.is_valid():

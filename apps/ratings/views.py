@@ -13,8 +13,15 @@ User = get_user_model()
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
 def create_agent_review(request, profile_id):
-    agent_profile = Profile.objects.get(id=profile_id)
+    try:
+        agent_profile = Profile.objects.get(id=profile_id)
+    except Profile.DoesNotExist:
+        return Response({"detail": "Agent profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
     data = request.data
+
+    if "rating" not in data or "comment" not in data:
+        return Response({"detail": "Both rating and comment are required."}, status=status.HTTP_400_BAD_REQUEST)
 
     profile_user = User.objects.get(id=agent_profile.user.id)
     if profile_user.email == request.user.email:
@@ -47,5 +54,8 @@ def create_agent_review(request, profile_id):
         total = 0
         for i in reviews:
             total += i.rating
+        
+        agent_profile.rating = round(total / len(reviews), 2)
+        agent_profile.save()
 
         return Response("Review Added")

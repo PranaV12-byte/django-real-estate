@@ -139,9 +139,10 @@ class Property(TimeStampedUUIDModel):
 
     def save(self, *args, **kwargs):
         self.title = str.capitalize(self.title)
-        self.ref_code = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=10)
-        )
+        if not self.ref_code:
+            self.ref_code = "".join(
+                random.choices(string.ascii_uppercase + string.digits, k=10)
+            )
         super(Property, self).save(*args, **kwargs)
 
     @property
