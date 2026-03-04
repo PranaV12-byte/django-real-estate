@@ -1,0 +1,128 @@
+﻿============================= test session starts ==============================
+platform linux -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0
+django: settings: real_estate.settings.development (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.4.0, factoryboy-2.1.0, Faker-8.9.1, cov-2.12.1
+collected 15 items
+
+tests/proflies/test_models.py F                                          [  6%]
+tests/users/test_models.py ...F.FF..F.FFF                                [100%]
+
+=================================== FAILURES ===================================
+_______________________________ test_profile_str _______________________________
+tests/proflies/test_models.py:5: in test_profile_str
+    assert profile.__str__() == f"{profile.user.username}'s profile"
+E   assert "Michelle's Profile" == "Michelle's profile"
+E     
+E     - Michelle's profile
+E     ?            ^
+E     + Michelle's Profile
+E     ?            ^
+______________________ test_base_user_email_is_normalized ______________________
+tests/users/test_models.py:20: in test_base_user_email_is_normalized
+    assert base_user.model == email.lower()
+           ^^^^^^^^^^^^^^^
+E   AttributeError: 'User' object has no attribute 'model'
+_________________________ test_super_user_is_not_staff _________________________
+tests/users/test_models.py:31: in test_super_user_is_not_staff
+    assert str(err.value) == 'Superusers must have us_staff=True'
+E   AssertionError: assert 'Superusers m...is_staff=True' == 'Superusers m...us_staff=True'
+E     
+E     - Superusers must have us_staff=True
+E     ?                      ^
+E     + Superusers must have is_staff=True
+E     ?                      ^
+_______________________ test_super_user_is_not_superuser _______________________
+tests/users/test_models.py:36: in test_super_user_is_not_superuser
+    user_Factory.create(is_superuser=False, is_staff=True)
+    ^^^^^^^^^^^^
+E   NameError: name 'user_Factory' is not defined
+______________________ test_create_user_with_no_firstname ______________________
+tests/users/test_models.py:55: in test_create_user_with_no_firstname
+    assert str(err.error) == 'Users must submit a first name'
+               ^^^^^^^^^
+E   AttributeError: 'ExceptionInfo' object has no attribute 'error'
+_____________________ test_create_superuser_with_no_email ______________________
+tests/users/test_models.py:68: in test_create_superuser_with_no_email
+    assert str(err.value) == "Admin Account: An email address is required"
+E   AssertionError: assert 'Admin Accoun...or this field' == 'Admin Accoun...s is required'
+E     
+E     - Admin Account: An email address is required
+E     + Admin Account: An email address is required for this field
+E     ?                                            +++++++++++++++
+____________________ test_create_superuser_with_no_password ____________________
+tests/users/test_models.py:74: in test_create_superuser_with_no_password
+    user_factory.create(is_superuser=True, is_staff=True, password=None)
+/usr/local/lib/python3.14/site-packages/factory/base.py:539: in create
+    return cls._generate(enums.CREATE_STRATEGY, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/factory/django.py:350: in wrapped_method
+    return method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/factory/django.py:122: in _generate
+    return super()._generate(strategy, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/factory/base.py:468: in _generate
+    return step.build()
+           ^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/factory/builder.py:274: in build
+    instance = self.factory_meta.instantiate(
+/usr/local/lib/python3.14/site-packages/factory/base.py:320: in instantiate
+    return self.factory._create(model, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/factory/django.py:350: in wrapped_method
+    return method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+tests/factories.py:45: in _create
+    return manager.create_superuser(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/users/managers.py:68: in create_superuser
+    user = self.create_user(
+apps/users/managers.py:44: in create_user
+    user.save(using=self._db)
+/usr/local/lib/python3.14/site-packages/django/contrib/auth/base_user.py:62: in save
+    super().save(**kwargs)
+/usr/local/lib/python3.14/site-packages/django/db/models/base.py:874: in save
+    self.save_base(
+/usr/local/lib/python3.14/site-packages/django/db/models/base.py:966: in save_base
+    updated = self._save_table(
+/usr/local/lib/python3.14/site-packages/django/db/models/base.py:1169: in _save_table
+    results = self._do_insert(
+/usr/local/lib/python3.14/site-packages/django/db/models/base.py:1220: in _do_insert
+    return manager._insert(
+/usr/local/lib/python3.14/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/django/db/models/query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/django/db/models/sql/compiler.py:1923: in execute_sql
+    with self.connection.cursor() as cursor:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/django/utils/asyncio.py:26: in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/django/db/backends/base/base.py:320: in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/site-packages/django/db/backends/base/base.py:296: in _cursor
+    self.ensure_connection()
+E   RuntimeError: Database access not allowed, use the "django_db" mark, or the "db" or "transactional_db" fixtures to enable it.
+__________________________ test_user_email_incorrect ___________________________
+tests/users/test_models.py:82: in test_user_email_incorrect
+    assert str(err.value) == "You must provide a valid email address"
+E   AssertionError: assert 'Invalid email address' == 'You must pro...email address'
+E     
+E     - You must provide a valid email address
+E     + Invalid email address
+=========================== short test summary info ============================
+FAILED tests/proflies/test_models.py::test_profile_str - assert "Michelle's P...
+FAILED tests/users/test_models.py::test_base_user_email_is_normalized - Attri...
+FAILED tests/users/test_models.py::test_super_user_is_not_staff - AssertionEr...
+FAILED tests/users/test_models.py::test_super_user_is_not_superuser - NameErr...
+FAILED tests/users/test_models.py::test_create_user_with_no_firstname - Attri...
+FAILED tests/users/test_models.py::test_create_superuser_with_no_email - Asse...
+FAILED tests/users/test_models.py::test_create_superuser_with_no_password - R...
+FAILED tests/users/test_models.py::test_user_email_incorrect - AssertionError...
+========================= 8 failed, 7 passed in 10.35s =========================

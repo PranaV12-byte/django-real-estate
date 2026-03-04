@@ -7,16 +7,16 @@ from rest_framework.response import Response
 from .models import Enquiry
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([permissions.AllowAny])
 def send_enquiry_email(request):
     data = request.data
 
     try:
-        subject = data.get('subject')
-        name = data.get('name')
-        email = data.get('email')
-        message = data.get('message')
+        subject = data.get("subject")
+        name = data.get("name")
+        email = data.get("email")
+        message = data.get("message")
         from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [settings.DEFAULT_FROM_EMAIL]
 
@@ -24,9 +24,7 @@ def send_enquiry_email(request):
         enquiry = Enquiry(name=name, email=email, subject=subject, message=message)
         enquiry.save()
 
-        return Response({"success": 'Your Enquiry was successfully submitted'})
+        return Response({"success": "Your Enquiry was successfully submitted"})
 
     except Exception as e:
         return Response({"fail": f"Enquiry was not sent. Error: {str(e)}"})
-
-    
