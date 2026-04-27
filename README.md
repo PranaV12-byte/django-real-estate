@@ -1,51 +1,133 @@
-# Real Estate Platform
+# Django Real Estate
 
-A robust, full-stack real estate web application designed to streamline property listings, property management, and user interactions. 
+Full-stack real estate application with a Django REST API, React client, PostgreSQL persistence, and Celery for asynchronous workflows.
 
-## 🚀 Overview
-This platform provides a complete solution for real estate operations. Users can browse and filter properties, view detailed listings, submit enquiries directly to agents, and leave ratings. It features a secure authentication system, an intuitive React-based frontend, and an asynchronous task queue for background operations like email dispatch. The entire application is containerised for a seamless, reproducible development and deployment experience.
+## High-Level Architecture
 
-## 💻 Tech Stack
-- **Frontend:** React 17, Redux Toolkit, React-Bootstrap
-- **Backend:** Django 3.2, Django REST Framework (DRF)
-- **Database:** PostgreSQL
-- **Caching & Async Queue:** Redis, Celery, Celery Flower
-- **Authentication:** Djoser (JWT)
-- **Infrastructure:** Docker, Docker Compose, Nginx
-- **Code Quality & Testing:** Pytest, Flake8, Black, isort
+```mermaid
+flowchart LR
+    U[User Browser] --> N[Nginx :8080]
+    N --> C[React Client]
+    C --> A[Django + DRF API]
 
-## 🛠️ Key Features
-- **Property Management:** Browse, filter, and search through property listings with pagination and detailed views.
-- **Secure Authentication:** JWT-based user registration, login, and email account activation.
-- **Asynchronous Tasks:** Celery integration for non-blocking email delivery and background processes.
-- **Profiles & Enquiries:** User profile management, property rating system, and direct contact tools for interacting with agents.
-- **Fully Dockerised:** A single `make build` command spins up the backend, frontend, database, cache, workers, and reverse proxy perfectly configured together.
+    A --> P[(PostgreSQL)]
+    A --> R[(Redis)]
 
-## ⚙️ Local Development Quick Start
+    A --> W[Celery Worker]
+    W --> R
+    W --> A
 
-**Prerequisites:** Docker and Docker Compose must be installed.
+    F[Flower :5557] --> W
 
-1. **Set up environment variables:**
-   Copy the example environment file and fill in your secrets.
-   ```bash
-   cp .env.example .env
-   ```
-2. **Build and start the containers:**
-   Use the provided makefile shortcut to build images and spin up the environment.
-   ```bash
-   make build
-   ```
-3. **Run database migrations:**
-   ```bash
-   make migrate
-   ```
-4. **Access the application:**
-   - App (via Nginx proxy): `http://localhost:8080`
-   - Celery Flower Dashboard: `http://localhost:5557`
+    subgraph API Modules
+      M1[users/auth via Djoser + JWT]
+      M2[properties]
+      M3[profiles]
+      M4[ratings]
+      M5[enquiries]
+    end
 
-## 🧹 Useful Make Commands
+    A --- M1
+    A --- M2
+    A --- M3
+    A --- M4
+    A --- M5
+```
 
-- `make up` - Start containers without rebuilding
-- `make down` - Stop all active containers
-- `make createsuperuser` - Create a new admin user
-- `make test` - Run the test suite with coverage
+## Stack
+
+- Backend: Django 3.2, Django REST Framework, Djoser, SimpleJWT
+- Frontend: React 17, Redux Toolkit, React Router
+- Data: PostgreSQL
+- Async: Celery, Redis, Flower
+- Infra: Docker, Docker Compose, Nginx
+- Quality: Pytest, Flake8, Black, isort
+
+## Setup Instructions
+
+### Prerequisites
+
+- Docker Desktop (or Docker Engine + Docker Compose)
+- GNU Make
+
+### 1) Configure environment variables
+
+Copy the template and fill required values:
+
+```bash
+cp .env.example .env
+```
+
+Minimum values to set in `.env`:
+
+```env
+SECRET_KEY=<django-secret>
+DEBUG=True
+ALLOWED_HOSTS=localhost 127.0.0.1
+POSTGRES_ENGINE=django.db.backends.postgresql
+POSTGRES_USER=<db-user>
+POSTGRES_PASSWORD=<db-password>
+POSTGRES_DB=<db-name>
+PG_HOST=postgres-db
+PG_PORT=5432
+SIGNING_KEY=<jwt-signing-key>
+EMAIL_HOST=<smtp-host>
+EMAIL_HOST_USER=<smtp-user>
+EMAIL_HOST_PASSWORD=<smtp-password>
+EMAIL_PORT=587
+CELERY_BROKER=redis://redis:6379/0
+CELERY_BACKEND=redis://redis:6379/0
+DOMAIN=localhost:8080
+```
+
+### 2) Build and start the stack
+
+```bash
+make build
+```
+
+This starts:
+- `api` (Django)
+- `client` (React dev server inside Docker)
+- `postgres-db`
+- `redis`
+- `celery_worker`
+- `flower`
+- `nginx`
+
+### 3) Run migrations
+
+```bash
+make migrate
+```
+
+### 4) Optional: create an admin user
+
+```bash
+make createsuperuser
+```
+
+### 5) Open the app
+
+- Application: `http://localhost:8080`
+- Celery Flower: `http://localhost:5557`
+
+## Development Commands
+
+- `make up` - start containers (no rebuild)
+- `make down` - stop containers
+- `make showlogs` - stream docker logs
+- `make makemigrations` - generate migrations
+- `make collectstatic` - collect static assets
+- `make test` - run tests with coverage
+- `make flake8` - lint Python code
+- `make black` / `make isort` - format imports and code
+
+## Design Decisions & Trade-offs
+
+- Django REST Framework + Djoser/SimpleJWT: fast implementation of auth and API patterns, but couples auth flows to package conventions and limits flexibility for deeply custom identity flows.
+- Docker Compose as the primary dev workflow: reproducible onboarding and parity across machines, with the trade-off of slower feedback loops than running parts natively.
+- Redis shared by Celery broker/result backend: operationally simple and low overhead for this scale, but creates a single dependency that affects background processing when degraded.
+- Celery for async email/background work: keeps API response time predictable, but introduces eventual consistency and requires workers/monitoring to be healthy.
+- Modular app split (`apps.users`, `apps.properties`, `apps.enquiries`, etc.): clearer domain boundaries and easier ownership, but requires stricter cross-app contracts to avoid circular coupling.
+- Nginx reverse proxy in front of services: realistic production-aligned routing and static/media serving, while adding one more moving part for local debugging.
